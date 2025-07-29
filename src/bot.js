@@ -1,3 +1,4 @@
+// bot.js
 import { generateClashConfig, generateNekoboxConfig, generateSingboxConfig } from './configGenerators.js';
 
 export default class TelegramBot {
@@ -13,7 +14,7 @@ export default class TelegramBot {
     const text = update.message.text || '';
 
     if (text.startsWith('/start')) {
-      await this.sendMessage(chatId, 'hai saya Converter Bot\n\nKirimkan saya link konfigurasi V2Ray dan saya akan mengubahnya ke format Singbox,Nekobox Dan Clash.\n\nContoh:\nvless://...\nvmess://...\ntrojan://...\nss://...\n\nCatatan:\n- Maksimal 10 link per permintaan.\n- Disarankan menggunakan Singbox versi 1.11.14 atau 1.11.15 untuk hasil terbaik.\n\nbaca baik-baik dulu sebelum nanya.');
+      await this.sendMessage(chatId, 'hai saya Converter Bot\n\nKirimkan saya link konfigurasi V2Ray dan saya akan mengubahnya ke format Singbox,Nekobox Dan Clash.\n\nContoh:\nvless://...\nvmess://...\ntrojan://...\nss://...\n\nCatatan:\n- Maksimal 10 link per permintaan.\n- Disarankan menggunakan Singbox versi 1.10.3 atau 1.11.8 untuk hasil terbaik.\n\nbaca baik-baik dulu sebelum nanya.');
     } else if (text.includes('://')) {
       try {
         const links = text.split('\n').filter(line => line.trim().includes('://'));
@@ -23,12 +24,10 @@ export default class TelegramBot {
           return new Response('OK', { status: 200 });
         }
 
-        // Generate configurations
         const clashConfig = generateClashConfig(links, true);
         const nekoboxConfig = generateNekoboxConfig(links, true);
         const singboxConfig = generateSingboxConfig(links, true);
 
-        // Send files
         await this.sendDocument(chatId, clashConfig, 'clash.yaml', 'text/yaml');
         await this.sendDocument(chatId, nekoboxConfig, 'nekobox.json', 'application/json');
         await this.sendDocument(chatId, singboxConfig, 'singbox.bpf', 'application/json');
@@ -49,10 +48,7 @@ export default class TelegramBot {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text
-      })
+      body: JSON.stringify({ chat_id: chatId, text })
     });
     return response.json();
   }
@@ -63,13 +59,10 @@ export default class TelegramBot {
     formData.append('document', blob, filename);
     formData.append('chat_id', chatId.toString());
 
-    const response = await fetch(
-      `${this.apiUrl}/bot${this.token}/sendDocument`, {
-        method: 'POST',
-        body: formData
-      }
-    );
-
+    const response = await fetch(`${this.apiUrl}/bot${this.token}/sendDocument`, {
+      method: 'POST',
+      body: formData
+    });
     return response.json();
   }
 }
